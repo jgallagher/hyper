@@ -57,6 +57,8 @@ impl<'a, N: NetworkListener + 'a> Iterator for NetworkConnections<'a, N> {
 pub trait NetworkStream: Read + Write + Any + Send + Typeable {
     /// Get the remote address of the underlying connection.
     fn peer_addr(&mut self) -> io::Result<SocketAddr>;
+    /// This will be called when Stream should no longer be kept alive.
+    fn close(&mut self) {}
 }
 
 /// A connector creates a NetworkStream.
@@ -123,6 +125,7 @@ impl NetworkStream + Send {
     }
 
     /// If the underlying type is T, extract it.
+    #[inline]
     pub fn downcast<T: Any>(self: Box<NetworkStream + Send>)
             -> Result<Box<T>, Box<NetworkStream + Send>> {
         if self.is::<T>() {
