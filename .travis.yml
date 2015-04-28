@@ -1,14 +1,23 @@
 language: rust
+matrix:
+    fast_finish: true
+    include:
+        - rust: nightly
+          env: FEATURES="--features nightly"
+        - rust: nightly
+          env: FEATURES="--features nightly" BENCH=true
+        - rust: beta
+
 sudo: false
 
 cache:
     directories:
         - target
 
-script:
-    - cargo build --features nightly
-    - cargo test --features nightly
-    - cargo bench --features nightly
+script: |
+    [ "$BENCH" ] &&
+        cargo bench $FEATURES
+        || (cargo build $FEATURES && cargo test $FEATURES)
 
 after_success: |
     [ $TRAVIS_BRANCH = master ] &&
